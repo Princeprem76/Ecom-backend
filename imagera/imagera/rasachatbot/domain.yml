@@ -31,7 +31,7 @@ responses:
     - text: "To track your order, please provide your order code and email address."
 
   utter_return_product:
-    - text: "Please Login and navigate to the this link https://mountemart.com.np/return-product for details."
+    - text: "Please Login and navigate to the this link https://imagera.com.np/return-product for details."
   
   utter_goodbye:
     - text: "Bye"

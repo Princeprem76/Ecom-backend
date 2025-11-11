@@ -56,8 +56,8 @@ COPY --from=python-build-stage /usr/src/app/wheels  /wheels/
 RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
   && rm -rf /wheels/
 
-# RUN pip install rasa==3.6.20
-# RUN pip install rasa-sdk==3.6.2
+RUN pip install rasa==3.6.20
+RUN pip install rasa-sdk==3.6.2
 
 RUN apt-get update && apt-get install -y netcat-openbsd
 
@@ -86,14 +86,14 @@ RUN chmod +x /start
 COPY ./compose/waitforit.sh /waitforit.sh
 RUN chmod +x /waitforit.sh
 
-# COPY ./actions /actions
-# COPY ./compose/production/rasa/rasa_actions/start /start-rasa-action
-# RUN sed -i 's/\r$//g'  /start-rasa-action
-# RUN chmod +x  /start-rasa-action
+COPY ./actions /actions
+COPY ./compose/production/rasa/rasa_actions/start /start-rasa-action
+RUN sed -i 's/\r$//g'  /start-rasa-action
+RUN chmod +x  /start-rasa-action
 
-# COPY ./compose/production/rasa/start /start-rasa
-# RUN sed -i 's/\r$//g' /start-rasa
-# RUN chmod +x /start-rasa
+COPY ./compose/production/rasa/start /start-rasa
+RUN sed -i 's/\r$//g' /start-rasa
+RUN chmod +x /start-rasa
 
 # copy application code to WORKDIR
 COPY --chown=django:django . ${APP_HOME}

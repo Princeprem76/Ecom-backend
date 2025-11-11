@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Ensure the Rasa server runs with API enabled and on the specified port
+exec rasa run --model imagera/rasachatbot/models/20240622-201737-cautious-alignment.tar.gz --endpoints imagera/rasachatbot/endpoints.yml --enable-api --port 5005

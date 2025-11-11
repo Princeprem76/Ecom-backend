@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from imagera.payments.signals import payment_completed
+# from imagera.payments.signals import payment_completed
 from imagera.core.payment_gateway import EsewaTransaction, KhaltiTransaction
 from imagera.core.utils import Util
 from imagera.orders.models import CustomerCouponUsed, Orders
@@ -91,11 +91,11 @@ class OrderPaymentSerializer(serializers.Serializer):
         )
         ordercode.save()
         try:
-            payment_completed.send(
-                sender=None,
-                user=self.context["request"].user,
-                order_info=ordercode.order_code,
-            )
+            # payment_completed.send(
+            #     sender=None,
+            #     user=self.context["request"].user,
+            #     order_info=ordercode.order_code,
+            # )
             Util.send_purchase_invoice(
                 order=ordercode,
                 discount=discount_price,
@@ -180,11 +180,11 @@ class CardInformationSerializer(serializers.Serializer):
         )
         ordercode.save()
         try:
-            payment_completed.send(
-                sender=None,
-                user=self.context["request"].user,
-                order_info=ordercode.order_code,
-            )
+            # payment_completed.send(
+            #     sender=None,
+            #     user=self.context["request"].user,
+            #     order_info=ordercode.order_code,
+            # )
             Util.send_purchase_invoice(
                 order=ordercode,
                 discount=discount_price,

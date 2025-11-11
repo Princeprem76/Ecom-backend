@@ -16,6 +16,6 @@ urlpatterns = [
         "admin-orders/",
         include("imagera.orders.api.v1.admin.urls", namespace="admin_orders"),
     ),
-    # path("payments/", include("imagera.payments.api.v1.urls", namespace="payments")),
+    path("payments/", include("imagera.payments.api.v1.urls", namespace="payments")),
    
 ]

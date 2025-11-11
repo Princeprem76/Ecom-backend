@@ -4,7 +4,7 @@ volumes:
   
 
 services:
-  django:
+  django: &django
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
@@ -33,3 +33,25 @@ services:
       - imagera_local_postgres_data_backups:/backups
     env_file:
       - ./.envs/.local/.postgres
+  
+  actions:
+    <<: *django
+    image: imagera_local_rasa_actions
+    container_name: imagera_local_rasa_actions
+    depends_on:
+      - postgres
+      - django
+      - rasa
+    ports:
+      - "5055:5055"
+    command: /start-rasa-action
+
+  rasa:
+    <<: *django
+    image: imagera_local_rasa
+    container_name: imagera_local_rasa
+    depends_on:
+      - postgres
+    ports:
+      - "5005:5005"
+    command: /start-rasa

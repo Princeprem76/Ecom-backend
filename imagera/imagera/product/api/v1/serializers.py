@@ -427,3 +427,11 @@ class ProductReviewRatingSerializer(serializers.ModelSerializer):
             instance.review_images.all(), many=True, context=self.context
         ).data
         return representation
+
+class ImageSearchRequestSerializer(serializers.Serializer):
+    image = serializers.ImageField(required=True)
+
+    def validate(self, attrs):
+        if not attrs.get("image"):
+            raise serializers.ValidationError("Provide image.")
+        return attrs

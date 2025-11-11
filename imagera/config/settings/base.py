@@ -17,6 +17,7 @@ READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
 if READ_DOT_ENV_FILE:
     # OS environment variables take precedence over variables from .env
     env.read_env(str(BASE_DIR / ".env"))
+    
 
 # GENERAL
 # ------------------------------------------------------------------------------
@@ -350,3 +351,11 @@ ASGI_APPLICATION = "config.asgi.application"
 
 # STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 # STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY")
+
+# Bing Search API
+BING_VISUAL_SEARCH_ENDPOINT = env.str(
+    "BING_VISUAL_SEARCH_ENDPOINT", default="https://api.bing.microsoft.com/v7.0/images/visualsearch"
+)
+BING_VISUAL_SEARCH_KEY = env.str("BING_VISUAL_SEARCH_KEY", default="dhcscgyjajchd")  # set in environment
+BING_MARKET = env.str("BING_MARKET", default="en-US")
+

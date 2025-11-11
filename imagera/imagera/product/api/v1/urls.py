@@ -9,6 +9,7 @@ from imagera.product.api.v1.views import (
     CreateViewWishItem,
     FindProducts,
     ForbiddenDeliveryCheck,
+    ImageFindProducts,
     ProductCommentView,
     ProductComparisonView,
     ProductRecommendationView,
@@ -107,16 +108,6 @@ urlpatterns = [
         name="top_selling",
     ),
     # path(
-    #     "user-subscription/",
-    #     AddUsersSubscription.as_view(),
-    #     name="user_subscription",
-    # ),
-    # path(
-    #     "subscription-plans/",
-    #     SubscriptionPlanList.as_view(),
-    #     name="subscription_plans",
-    # ),
-    # path(
     #     "view-comboproduct/",
     #     ViewComboProducts.as_view(),
     #     name="combo_product",
@@ -165,6 +156,11 @@ urlpatterns = [
         "top-review/",
         TopReviewRating.as_view(),
         name="top_review_rating",
+    ),
+    path(
+        "search/image/",
+        ImageFindProducts.as_view(),
+        name="product-image-search",
     ),
 ]
 

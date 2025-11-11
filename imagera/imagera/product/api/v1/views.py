@@ -1,6 +1,7 @@
 from typing import Any
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
+from config.settings.base import env
 from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
@@ -16,10 +17,11 @@ from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_sche
 from imagera.core.pagination import DynamicPageNumberPagination
 from django.db.models import Avg, Count
 from rest_framework import serializers
-
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from imagera.core.recommendations import get_hybrid_recommendations
 from imagera.orders.models import ForbiddenDelivery, Items
 from imagera.product.api.v1.serializers import (
+    ImageSearchRequestSerializer,
     ProductCommentSerializer,
     ProductReviewRatingSerializer,
     ProductSerializer,
@@ -48,7 +50,7 @@ from django.db.models import Q
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 import json
 from django.core.cache import cache
-
+from core.bing_search_service import ImageProductSearch
 
 class ViewCategory(ListAPIView):
     permission_classes = []
@@ -845,3 +847,53 @@ class WeeklyDropProductView(ListAPIView):
         serializer = ProductSerializer(product_data, many=True)
         response = {"data": serializer.data}
         return Response(response, status=status.HTTP_200_OK)
+
+
+
+
+class ImageFindProducts(FindProducts):
+    """
+    POST an image (or image_url) → use Bing Visual Search to get product name →
+    inject into FindProducts as 'product_name' → return the same payload format.
+    """
+    permission_classes = []
+    parser_classes = [MultiPartParser, FormParser, JSONParser] 
+
+    @extend_schema(
+        operation_id="Product Image Search API",
+        description="Upload an image. Extracts a product name and reuses text search.",
+        request=ImageSearchRequestSerializer,           
+        responses={200: ProductSerializer(many=True)},
+    )
+    def post(self, request, *args, **kwargs):
+        image_file = request.FILES.get("image")
+        
+
+        if not image_file:
+            return Response(
+                {"detail": "Provide Image to process this request!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        image_service = ImageProductSearch(
+            endpoint=getattr(env, "BING_VISUAL_SEARCH_ENDPOINT"),
+            subscription_key=getattr(env, "BING_VISUAL_SEARCH_KEY"),
+            market=getattr(env, "BING_MARKET", "en-US"),
+        )
+
+        product_name = image_service.extract_product_name(image_file=image_file)
+
+        if not product_name:
+            return Response(
+                {"detail": "Could not extract a product name from the image."},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+        user = request.user if request.user.is_authenticated else None
+        if user:
+            SearchedProduct.objects.get_or_create(user=user, searched_term=product_name)
+
+        mutable_qs = request._request.GET.copy() if hasattr(request._request, "GET") else QuerySet(mutable=True)
+        mutable_qs["product_name"] = product_name
+        request._request.GET = mutable_qs
+
+        return super().get(request, *args, **kwargs)

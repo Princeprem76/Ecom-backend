@@ -7,7 +7,7 @@ import base64
 from django.core import files
 from django.conf import settings
 # from config.settings.base import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
-from imagera.core.mixins import Facebook, Google
+# from imagera.core.mixins import Facebook, Google
 from imagera.core.utils import Util
 from imagera.users.models import BusinessAccount, User
 from django.template.loader import render_to_string

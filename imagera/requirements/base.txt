@@ -2,11 +2,11 @@ python-slugify==8.0.4  # https://github.com/un33k/python-slugify
 Pillow==10.3.0  # https://github.com/python-pillow/Pillow
 argon2-cffi==23.1.0  # https://github.com/hynek/argon2_cffi
 whitenoise==6.6.0  # https://github.com/evansd/whitenoise
-redis==5.0.4  # https://github.com/redis/redis-py
-hiredis==2.3.2  # https://github.com/redis/hiredis-py
-celery==5.4.0  # pyup: < 6.0  # https://github.com/celery/celery
-django-celery-beat==2.6.0  # https://github.com/celery/django-celery-beat
-flower==2.0.1  # https://github.com/mher/flower
+# redis==5.0.4  # https://github.com/redis/redis-py
+# hiredis==2.3.2  # https://github.com/redis/hiredis-py
+# celery==5.4.0  # pyup: < 6.0  # https://github.com/celery/celery
+# django-celery-beat==2.6.0  # https://github.com/celery/django-celery-beat
+# flower==2.0.1  # https://github.com/mher/flower
 uvicorn[standard]==0.29.0  # https://github.com/encode/uvicorn
 
 # Django
@@ -28,15 +28,15 @@ huey==2.4.4
 django-rest-swagger==2.2.0
 djangorestframework-simplejwt==5.2.2
 pyotp==2.9.0
-facebook-sdk>=3.1.0,<3.2.0
+# facebook-sdk>=3.1.0,<3.2.0
 fcm_django<=2.1.0
 aiogram==2.15
 boto3==1.34.131
 h5py==3.11.0
 botocore==1.34.131
-google-auth==2.30.0
-structlog==23.3.0
-structlog-sentry==2.1.0
+# google-auth==2.30.0
+# structlog==23.3.0
+# structlog-sentry==2.1.0
 tabulate==0.9.0
 tarsafe==0.0.4
 keras==2.12.0

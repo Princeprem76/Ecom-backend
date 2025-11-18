@@ -1,12 +1,33 @@
-.editorconfig
-.gitattributes
-.github
-.gitignore
-.gitlab-ci.yml
-.idea
-.pre-commit-config.yaml
-.readthedocs.yml
-.travis.yml
-venv
-.git
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+
+# Virtualenvs
+.venv/
+venv/
+.env/
 .envs/
+*.env
+
+# Git & IDE
+.git/
+.gitignore
+.idea/
+.vscode/
+
+# Node / frontend
+node_modules/
+*.log
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Data / uploads / backups
+media/
+staticfiles/
+backups/

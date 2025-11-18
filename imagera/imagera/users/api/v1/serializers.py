@@ -125,6 +125,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 "otp_verification_template.html",
                 {"user": user, "otp": generate_otp(user)},
             )
+            print(generate_otp(user))
             to_email = validated_data["email"]
             data = {"email_body": message, "email": to_email, "subject": mail_subject}
             Util.send_email(data)

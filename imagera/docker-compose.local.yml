@@ -36,23 +36,33 @@ services:
       - ./.envs/.local/.postgres
   
   actions:
-    <<: *django
+    build:
+      context: .
+      dockerfile: ./compose/local/rasa/rasa_actions/Dockerfile
     image: imagera_local_rasa_actions
     container_name: imagera_local_rasa_actions
     depends_on:
-      - postgres
-      - django
       - rasa
+      - postgres
+    env_file:
+      - .env
     ports:
       - "5055:5055"
     command: /start-rasa-action
 
   rasa:
-    <<: *django
+    build:
+      context: .
+      dockerfile: ./compose/local/rasa/Dockerfile
     image: imagera_local_rasa
     container_name: imagera_local_rasa
     depends_on:
       - postgres
+    env_file:
+      - .env
     ports:
       - "5005:5005"
     command: /start-rasa
+
+
+

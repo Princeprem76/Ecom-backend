@@ -14,6 +14,7 @@ from imagera.product.models import (
     SearchedProduct,
     ExtraAtrributeFields,
     ProductTags,
+    BrandDetails,
 )
 from django_summernote.admin import SummernoteModelAdmin
 
@@ -38,5 +39,6 @@ admin.site.register(
         SearchedProduct,
         ExtraAtrributeFields,
         ProductTags,
+        BrandDetails,
     ]
 )

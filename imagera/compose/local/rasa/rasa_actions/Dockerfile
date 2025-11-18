@@ -1,9 +1,9 @@
-FROM rasa/rasa-sdk:latest
+FROM rasa/rasa-sdk:3.6.2
 
 WORKDIR /app
 
 # Copy only the actions directory to the container
-COPY ./imagera/rasachatbot/actions /app/actions
+COPY ./actions /app/actions
 
 # Create the start-actions script inline and set permissions
 RUN echo '#!/bin/bash\nexec rasa-sdk run --port 5055' > /app/start-actions && chmod +x /app/start-actions

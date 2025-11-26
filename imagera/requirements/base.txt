@@ -33,7 +33,7 @@ channels==4.0.0
 channels-redis==4.1.0
 stripe==10.3.0
 django-summernote==0.8.20.0
-
+google-cloud-aiplatform
 pandas==2.2.2
 scikit-learn==1.5.0
 scipy==1.13.1

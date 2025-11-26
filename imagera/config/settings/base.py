@@ -353,9 +353,6 @@ ASGI_APPLICATION = "config.asgi.application"
 # STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY")
 
 # Bing Search API
-BING_VISUAL_SEARCH_ENDPOINT = env.str(
-    "BING_VISUAL_SEARCH_ENDPOINT", default="https://api.bing.microsoft.com/v7.0/images/visualsearch"
-)
-BING_VISUAL_SEARCH_KEY = env.str("BING_VISUAL_SEARCH_KEY", default="dhcscgyjajchd")  # set in environment
-BING_MARKET = env.str("BING_MARKET", default="en-US")
-
+GOOGLE_VERTEX_PROJECT_ID = env.str("GOOGLE_VERTEX_PROJECT_ID")
+GOOGLE_VERTEX_LOCATION = env.str("GOOGLE_VERTEX_LOCATION", default="us-central1")
+GOOGLE_VERTEX_ENDPOINT_ID = env.str("GOOGLE_VERTEX_ENDPOINT_ID")

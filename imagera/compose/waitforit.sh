@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 
-MAX_TRIES=3  # Maximum number of attempts
-WAIT_INTERVAL=15  # Interval between attempts in seconds
+MAX_TRIES=5  # Maximum number of attempts
+WAIT_INTERVAL=25  # Interval between attempts in seconds
 QUIET=0
 TIMEOUT=30
 POST_SUCCESS_WAIT=1  # Additional wait time after successful connection (in seconds)

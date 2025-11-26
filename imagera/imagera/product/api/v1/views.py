@@ -50,7 +50,7 @@ from django.db.models import Q
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 import json
 from django.core.cache import cache
-from core.bing_search_service import ImageProductSearch
+from core.bing_search_service import VertexProductRecognizer
 
 class ViewCategory(ListAPIView):
     permission_classes = []
@@ -853,7 +853,7 @@ class WeeklyDropProductView(ListAPIView):
 
 class ImageFindProducts(FindProducts):
     """
-    POST an image (or image_url) → use Bing Visual Search to get product name →
+    POST an image→ use Visual Search to get product name →
     inject into FindProducts as 'product_name' → return the same payload format.
     """
     permission_classes = []
@@ -875,25 +875,33 @@ class ImageFindProducts(FindProducts):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        image_service = ImageProductSearch(
-            endpoint=getattr(env, "BING_VISUAL_SEARCH_ENDPOINT"),
-            subscription_key=getattr(env, "BING_VISUAL_SEARCH_KEY"),
-            market=getattr(env, "BING_MARKET", "en-US"),
+        recognizer = VertexProductRecognizer(
+            project_id=env.GOOGLE_VERTEX_PROJECT_ID,
+            location=env.GOOGLE_VERTEX_LOCATION,
+            endpoint_id=env.GOOGLE_VERTEX_ENDPOINT_ID,
         )
 
-        product_name = image_service.extract_product_name(image_file=image_file)
+        product_name = recognizer.extract_product_name(
+            image_file=image_file,
+        )
 
         if not product_name:
             return Response(
-                {"detail": "Could not extract a product name from the image."},
+                {"detail": "Could not infer a product name from this image."},
                 status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
-        user = request.user if request.user.is_authenticated else None
-        if user:
-            SearchedProduct.objects.get_or_create(user=user, searched_term=product_name)
 
-        mutable_qs = request._request.GET.copy() if hasattr(request._request, "GET") else QuerySet(mutable=True)
-        mutable_qs["product_name"] = product_name
-        request._request.GET = mutable_qs
+        # log search term like in your text search endpoint
+        user = request.user if request.user and request.user.is_authenticated else None
+        if user:
+            SearchedProduct.objects.get_or_create(
+                user=user,
+                searched_term=product_name,
+            )
+
+        # Inject product_name into GET params -> reuse FindProducts.get()
+        q = request._request.GET.copy()
+        q["product_name"] = product_name
+        request._request.GET = q
 
         return super().get(request, *args, **kwargs)

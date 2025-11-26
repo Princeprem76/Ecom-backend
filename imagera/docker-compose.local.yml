@@ -48,7 +48,7 @@ services:
       - .env
     ports:
       - "5055:5055"
-    command: /start-rasa-action
+    # command: /start-rasa-action
 
   rasa:
     build:

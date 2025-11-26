@@ -1,104 +1,97 @@
-# core/services/bing_visual_search.py
-import requests
+# core/services/vertex_product_search.py
 from typing import Optional, Tuple
 
-class ImageProductSearch:
+from google.cloud import aiplatform_v1 as aiplatform
+
+
+class VertexProductRecognizer:
     """
-    Thin wrapper around Bing Visual Search to extract a single best product name
-    from an image (bytes upload) or image URL.
+    Calls a deployed Vertex AI Vision endpoint (image classification / product model)
+    and returns ONE best product name (displayName).
     """
 
-    def __init__(self, endpoint: str, subscription_key: str, market: str = "en-US", timeout: int = 8):
-        self.endpoint = endpoint.rstrip("/")
-        self.key = subscription_key
-        self.market = market
-        self.timeout = timeout
+    def __init__(
+        self,
+        project_id: str,
+        location: str,
+        endpoint_id: str,
+    ):
+        self.project_id = project_id
+        self.location = location
+        self.endpoint_id = endpoint_id
+
+        api_endpoint = f"{location}-aiplatform.googleapis.com"
+        self.client = aiplatform.PredictionServiceClient(
+            client_options={"api_endpoint": api_endpoint}
+        )
+        self.endpoint_path = self.client.endpoint_path(
+            project=project_id,
+            location=location,
+            endpoint=endpoint_id,
+        )
 
     def extract_product_name(
         self,
-        image_file=None,          # Django InMemoryUploadedFile/File
+        image_file=None,     
     ) -> Optional[str]:
         """
-        Returns a single product name (string) or None if not found.
-        Prefers product-style actions; falls back to tags when needed.
+        Returns the top predicted displayName from the model,
+        or None if nothing reasonable is found.
+
+        Assumes your model is an image classification-type model
+        that returns predictions with:
+          - displayNames
+          - confidences
         """
-        headers = {"Ocp-Apim-Subscription-Key": self.key}
-        params = {"mkt": self.market}
+        if not image_file:
+            raise ValueError("Provide image_file")
 
-        files = None
-        data = None
+            # Read bytes from uploaded image
+        content = image_file.read()
+        instance = {"content": content, "mime_type": image_file.content_type or "image/jpeg"}
 
-        if image_file is not None:
-            # Binary upload
-            files = {"image": (getattr(image_file, "name", "upload.jpg"), image_file, "application/octet-stream")}
+
+        instances = [instance]
+        parameters = {}
+
+        try:
+            response = self.client.predict(
+                endpoint=self.endpoint_path,
+                instances=instances,
+                parameters=parameters,
+            )
+        except Exception:
+            return None
+
+        # response.predictions is a list of per-instance predictions.
+        # For AutoML / Vertex Vision classification you usually get:
+        # predictions[0]["displayNames"], predictions[0]["confidences"]
+        if not response.predictions:
+            return None
+
+        prediction = response.predictions[0]
+
+        # predictions are protobuf Value objects; convert to dict
+        # so we can index with normal keys
+        if hasattr(prediction, "items"):
+            pred_dict = dict(prediction.items())
         else:
-            raise ValueError("Provide either image_file or image_url")
+            pred_dict = dict(prediction)
 
-        try:
-            if files:
-                resp = requests.post(self.endpoint, headers=headers, params=params, files=files, timeout=self.timeout)
-            else:
-                resp = requests.post(self.endpoint, headers=headers, params=params, json=data, timeout=self.timeout)
+        display_names = pred_dict.get("displayNames") or pred_dict.get("display_names")
+        confidences = pred_dict.get("confidences") or pred_dict.get("scores")
 
-            resp.raise_for_status()
-            payload = resp.json()
-        except requests.RequestException:
-            return None
-        except ValueError:
+        if not display_names:
             return None
 
-        # Heuristic parsing:
-        # 1) Look for product-like actions first (e.g., ProductVisualSearch or similar)
-        name = self._parse_product_name(payload)
-        if name:
-            return name
+        # Pick the highest-confidence label
+        if confidences and len(confidences) == len(display_names):
+            best_idx = max(range(len(confidences)), key=lambda i: confidences[i])
+        else:
+            best_idx = 0
 
-        # 2) Fallback to ImageTags (displayName)
-        return self._parse_tag_name(payload)
+        best_name = display_names[best_idx]
+        if isinstance(best_name, str) and best_name.strip():
+            return best_name.strip()
 
-    # ----- helpers -----
-
-    def _parse_product_name(self, payload) -> Optional[str]:
-        # Typical structure: payload["tags"][i]["actions"][j]
-        # Product actions often contain a 'data'->'value' list with 'name' (or 'displayName')
-        try:
-            tags = payload.get("tags", []) or []
-            for tag in tags:
-                actions = tag.get("actions", []) or []
-                for act in actions:
-                    action_type = act.get("actionType", "")
-                    if "Product" in action_type or "Shopping" in action_type or "VisualSearch" in action_type:
-                        data = act.get("data") or {}
-                        values = data.get("value") or []
-                        # Prefer the first plausible item with a name/brand-like field
-                        for v in values:
-                            # Common keys observed: 'name', 'displayName'
-                            candidate = v.get("name") or v.get("displayName")
-                            if candidate and isinstance(candidate, str) and len(candidate) <= 120:
-                                return candidate
-        except Exception:
-            pass
-        return None
-
-    def _parse_tag_name(self, payload) -> Optional[str]:
-        # Fallback: use non-product visual tags
-        try:
-            tags = payload.get("tags", []) or []
-            # Usually the first tag has 'displayName' that's the best guess (e.g., "Nike Air Max 90")
-            for tag in tags:
-                dn = tag.get("displayName")
-                if dn and isinstance(dn, str) and len(dn) <= 120:
-                    return dn
-                # Or actions → ImageTags
-                actions = tag.get("actions", []) or []
-                for act in actions:
-                    if act.get("actionType") in ("ImageTags", "VisualSearch"):
-                        data = act.get("data") or {}
-                        values = data.get("value") or []
-                        for v in values:
-                            candidate = v.get("displayName")
-                            if candidate and isinstance(candidate, str) and len(candidate) <= 120:
-                                return candidate
-        except Exception:
-            pass
         return None

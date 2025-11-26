@@ -2,5 +2,5 @@
 # Wait for Django to be ready
 /app/compose/waitforit.sh django:8000 --timeout=60 --strict -- echo "Django is up and running"
 
-# Ensure the Rasa server runs with API enabled and on the specified port
-exec rasa run actions --port 5055
+# Start the Rasa SDK action server (no full Rasa, no TensorFlow needed)
+exec python -m rasa_sdk --actions actions --port 5055

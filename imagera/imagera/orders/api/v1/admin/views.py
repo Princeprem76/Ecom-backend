@@ -1,21 +1,21 @@
 from imagera.orders.api.v1.admin.serializers import (
     AdminConfirmedOrderSerializer,
     AdminExpressShippingChargeSerializer,
-    AdminExpressShippingPlaceSerializer,
+    # AdminExpressShippingPlaceSerializer,
     AdminReturnProductSerializer,
     AdminShippingSerializer,
-    AdminStandardFreeDeliverySerializer,
+    # AdminStandardFreeDeliverySerializer,
     AdminStandardShippingChargeSerializer,
     UpdateOrderStatusSerializer,
 )
 from imagera.orders.models import (
     ExpressShippingCharge,
-    ExpressShippingPlace,
+  
     Items,
     Orders,
     ReturnProductRequest,
     ShippingType,
-    StandardFreeDeliveryPlace,
+   
     StandardShippingCharge,
 )
 from typing import Any
@@ -221,98 +221,98 @@ class UpdateDeleteStandardShippingCharge(RetrieveUpdateDestroyAPIView):
         )
 
 
-class CreateExpressShippingPlace(ListCreateAPIView):
-    serializer_class = AdminExpressShippingPlaceSerializer
-    permission_classes = [
-        IsAuthenticated,
-        IsAdminUser,
-    ]
+# class CreateExpressShippingPlace(ListCreateAPIView):
+#     serializer_class = AdminExpressShippingPlaceSerializer
+#     permission_classes = [
+#         IsAuthenticated,
+#         IsAdminUser,
+#     ]
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            {"message": "Express Shipping Place created"},
-            status=status.HTTP_201_CREATED,
-        )
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.serializer_class(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(
+#             {"message": "Express Shipping Place created"},
+#             status=status.HTTP_201_CREATED,
+#         )
 
-    def get(self, request, *args, **kwargs):
-        queryset = ExpressShippingPlace.objects.all()
-        serializer = self.serializer_class(queryset, many=True)
-        return Response({"data": serializer.data}, status=status.HTTP_200_OK)
-
-
-class UpdateDeleteExpressShippingPlace(RetrieveUpdateDestroyAPIView):
-    serializer_class = AdminExpressShippingPlaceSerializer
-    permission_classes = [
-        IsAuthenticated,
-        IsAdminUser,
-    ]
-    queryset = ExpressShippingPlace.objects.all()
-    lookup_field = "pk"
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response({"detail": "Updated!"}, status=status.HTTP_200_OK)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(
-            {"detail": "Express Shipping Place has been deleted!"},
-            status=status.HTTP_200_OK,
-        )
+#     def get(self, request, *args, **kwargs):
+#         queryset = ExpressShippingPlace.objects.all()
+#         serializer = self.serializer_class(queryset, many=True)
+#         return Response({"data": serializer.data}, status=status.HTTP_200_OK)
 
 
-class CreateStandardShippingPlace(ListCreateAPIView):
-    serializer_class = AdminStandardFreeDeliverySerializer
-    permission_classes = [
-        IsAuthenticated,
-        IsAdminUser,
-    ]
+# class UpdateDeleteExpressShippingPlace(RetrieveUpdateDestroyAPIView):
+#     serializer_class = AdminExpressShippingPlaceSerializer
+#     permission_classes = [
+#         IsAuthenticated,
+#         IsAdminUser,
+#     ]
+#     queryset = ExpressShippingPlace.objects.all()
+#     lookup_field = "pk"
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            {"message": "Standard free Shipping Place created"},
-            status=status.HTTP_201_CREATED,
-        )
+#     def update(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         serializer = self.get_serializer(instance, data=request.data, partial=True)
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_update(serializer)
+#         return Response({"detail": "Updated!"}, status=status.HTTP_200_OK)
 
-    def get(self, request, *args, **kwargs):
-        queryset = StandardFreeDeliveryPlace.objects.all()
-        serializer = self.serializer_class(queryset, many=True)
-        return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+#     def destroy(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         self.perform_destroy(instance)
+#         return Response(
+#             {"detail": "Express Shipping Place has been deleted!"},
+#             status=status.HTTP_200_OK,
+#         )
 
 
-class UpdateDeleteStandardShippingPlace(RetrieveUpdateDestroyAPIView):
-    serializer_class = AdminStandardFreeDeliverySerializer
-    permission_classes = [
-        IsAuthenticated,
-        IsAdminUser,
-    ]
-    queryset = StandardFreeDeliveryPlace.objects.all()
-    lookup_field = "pk"
+# class CreateStandardShippingPlace(ListCreateAPIView):
+#     serializer_class = AdminStandardFreeDeliverySerializer
+#     permission_classes = [
+#         IsAuthenticated,
+#         IsAdminUser,
+#     ]
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response({"detail": "Updated!"}, status=status.HTTP_200_OK)
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.serializer_class(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(
+#             {"message": "Standard free Shipping Place created"},
+#             status=status.HTTP_201_CREATED,
+#         )
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(
-            {"detail": "Standard Shipping Place has been deleted!"},
-            status=status.HTTP_200_OK,
-        )
+#     def get(self, request, *args, **kwargs):
+#         queryset = StandardFreeDeliveryPlace.objects.all()
+#         serializer = self.serializer_class(queryset, many=True)
+#         return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+
+
+# class UpdateDeleteStandardShippingPlace(RetrieveUpdateDestroyAPIView):
+#     serializer_class = AdminStandardFreeDeliverySerializer
+#     permission_classes = [
+#         IsAuthenticated,
+#         IsAdminUser,
+#     ]
+#     queryset = StandardFreeDeliveryPlace.objects.all()
+#     lookup_field = "pk"
+
+#     def update(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         serializer = self.get_serializer(instance, data=request.data, partial=True)
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_update(serializer)
+#         return Response({"detail": "Updated!"}, status=status.HTTP_200_OK)
+
+#     def destroy(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         self.perform_destroy(instance)
+#         return Response(
+#             {"detail": "Standard Shipping Place has been deleted!"},
+#             status=status.HTTP_200_OK,
+#         )
 
 
 class CreateExpresshippingCharge(ListCreateAPIView):

@@ -42,24 +42,24 @@ class DropLocation(models.Model):
     name = models.CharField(max_length=255)
     phone = models.PositiveBigIntegerField()
     full_address = models.CharField(max_length=250)
-    district = models.CharField(max_length=255, choices=DISTRICT_CHOICES)
-    city = models.CharField(max_length=100, choices=MUNICIPALITY_CHOICES)
+    district = models.CharField(max_length=255, null=True)
+    city = models.CharField(max_length=100)
     label = models.CharField(max_length=255, null=True)
 
     # def __str__(self):
     #     return str(self.drop_location)
 
 
-class StandardFreeDeliveryCities(models.Model):
-    city = models.CharField(max_length=100, choices=MUNICIPALITY_CHOICES)
+# class StandardFreeDeliveryCities(models.Model):
+#     city = models.CharField(max_length=100)
 
 
-class StandardFreeDeliveryPlace(models.Model):
-    district = models.CharField(max_length=255, choices=DISTRICT_CHOICES)
-    cities = models.ManyToManyField(StandardFreeDeliveryCities)
+# class StandardFreeDeliveryPlace(models.Model):
+#     district = models.CharField(max_length=255)
+#     cities = models.ManyToManyField(StandardFreeDeliveryCities)
 
-    def __str__(self):
-        return str(self.district)
+#     def __str__(self):
+#         return str(self.district)
 
 
 class ShippingType(models.Model):
@@ -70,14 +70,13 @@ class ShippingType(models.Model):
 
 
 class StandardShippingCharge(models.Model):
-    city = models.CharField(max_length=100, choices=MUNICIPALITY_CHOICES)
     base_charge = models.PositiveIntegerField(default=0)
-    per_kg_charge = models.PositiveIntegerField(default=0)
+    # per_kg_charge = models.PositiveIntegerField(default=0)
 
 
-class ExpressShippingPlace(models.Model):
-    district = models.CharField(max_length=255, choices=DISTRICT_CHOICES)
-    cities = models.ManyToManyField(StandardFreeDeliveryCities)
+# class ExpressShippingPlace(models.Model):
+#     district = models.CharField(max_length=255)
+#     cities = models.ManyToManyField(StandardFreeDeliveryCities)
 
 
 class ExpressShippingCharge(models.Model):
@@ -271,7 +270,7 @@ class ReturnProductRequest(models.Model):
         Orders, on_delete=models.CASCADE, related_name="returned_order"
     )
     pickup_location = models.CharField(max_length=255)
-    district = models.CharField(max_length=255, choices=DISTRICT_CHOICES)
+    district = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
     contact = models.CharField(max_length=20)
     status = models.CharField(

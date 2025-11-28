@@ -5,12 +5,12 @@ from imagera.orders.api.v1.serializers import (
 )
 from imagera.orders.models import (
     ExpressShippingCharge,
-    ExpressShippingPlace,
+    # ExpressShippingPlace,
     Orders,
     ReturnProductRequest,
     ShippingType,
-    StandardFreeDeliveryCities,
-    StandardFreeDeliveryPlace,
+    # StandardFreeDeliveryCities,
+    # StandardFreeDeliveryPlace,
     StandardShippingCharge,
 )
 from rest_framework import serializers
@@ -121,28 +121,28 @@ class AdminReturnProductSerializer(serializers.ModelSerializer):
         return validated_data
 
 
-class AdminStandardFreeDeliverySerializer(serializers.ModelSerializer):
-    city_list = serializers.ListField(
-        child=serializers.CharField(max_length=100), write_only=True
-    )
-    cities = serializers.CharField(
-        source="standard_free_delivery_cities.city", read_only=True
-    )
+# class AdminStandardFreeDeliverySerializer(serializers.ModelSerializer):
+#     city_list = serializers.ListField(
+#         child=serializers.CharField(max_length=100), write_only=True
+#     )
+#     cities = serializers.CharField(
+#         source="standard_free_delivery_cities.city", read_only=True
+#     )
 
-    class Meta:
-        model = StandardFreeDeliveryPlace
-        fields = "__all__"
-        read_only_fields = ["cities"]
+#     class Meta:
+#         model = StandardFreeDeliveryPlace
+#         fields = "__all__"
+#         read_only_fields = ["cities"]
 
-    def create(self, validated_data):
-        city_list = validated_data.pop("city_list")
-        district_data = StandardFreeDeliveryPlace.objects.create(
-            district=validated_data["district"]
-        )
-        for place in city_list:
-            city, _ = StandardFreeDeliveryCities.objects.get_or_create(city=place)
-            district_data.cities.add(city)
-        return validated_data
+#     def create(self, validated_data):
+#         city_list = validated_data.pop("city_list")
+#         district_data = StandardFreeDeliveryPlace.objects.create(
+#             district=validated_data["district"]
+#         )
+#         for place in city_list:
+#             city, _ = StandardFreeDeliveryCities.objects.get_or_create(city=place)
+#             district_data.cities.add(city)
+#         return validated_data
 
 
 class AdminStandardShippingChargeSerializer(serializers.ModelSerializer):
@@ -157,28 +157,28 @@ class AdminStandardShippingChargeSerializer(serializers.ModelSerializer):
         return validated_data
 
 
-class AdminExpressShippingPlaceSerializer(serializers.ModelSerializer):
-    city_list = serializers.ListField(
-        child=serializers.CharField(max_length=100), write_only=True
-    )
-    cities = serializers.CharField(
-        source="express_shipping_place_cities.city", read_only=True
-    )
+# class AdminExpressShippingPlaceSerializer(serializers.ModelSerializer):
+#     city_list = serializers.ListField(
+#         child=serializers.CharField(max_length=100), write_only=True
+#     )
+#     cities = serializers.CharField(
+#         source="express_shipping_place_cities.city", read_only=True
+#     )
 
-    class Meta:
-        model = ExpressShippingPlace
-        fields = "__all__"
-        read_only_fields = ["cities"]
+#     class Meta:
+#         model = ExpressShippingPlace
+#         fields = "__all__"
+#         read_only_fields = ["cities"]
 
-    def create(self, validated_data):
-        city_list = validated_data.pop("city_list")
-        district_data = ExpressShippingPlace.objects.create(
-            district=validated_data["district"]
-        )
-        for place in city_list:
-            city, _ = StandardFreeDeliveryCities.objects.get_or_create(city=place)
-            district_data.cities.add(city)
-        return validated_data
+#     def create(self, validated_data):
+#         city_list = validated_data.pop("city_list")
+#         district_data = ExpressShippingPlace.objects.create(
+#             district=validated_data["district"]
+#         )
+#         for place in city_list:
+#             city, _ = StandardFreeDeliveryCities.objects.get_or_create(city=place)
+#             district_data.cities.add(city)
+#         return validated_data
 
 class AdminExpressShippingChargeSerializer(serializers.ModelSerializer):
     class Meta:

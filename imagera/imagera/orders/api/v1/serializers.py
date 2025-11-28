@@ -6,14 +6,12 @@ from imagera.orders.models import (
     CustomerCouponUsed,
     DropLocation,
     ExpressShippingCharge,
-    ExpressShippingPlace,
     ForbiddenDelivery,
     Items,
     Orders,
     ReturnProductImage,
     ReturnProductRequest,
     ShippingType,
-    StandardFreeDeliveryPlace,
     StandardShippingCharge,
 )
 from imagera.payments.models import OrderPayment
@@ -293,65 +291,19 @@ class UpdateOrderSerializer(serializers.Serializer):
             order_status="Pending",
         ).first()
         drop_location = DropLocation.objects.get(id=validated_data["drop_location_id"])
-        # Check for forbidden delivery
-        delivery_location_prices = StandardShippingCharge.objects.get(
-            city=drop_location.city
-        )
-        forbidden_products = []
-        shipping_price = 0
-        for item in order.item.all():
-            if (
-                item.item.product.free_delivery
-                and StandardFreeDeliveryPlace.objects.filter(
-                    cities__city=drop_location.city, district=drop_location.district
-                ).exists()
-            ):
-                shipping_price += 0
-            else:
-                shipping_price += (
-                    abs(item.quantity * item.item.product_weight - 1)
-                    * delivery_location_prices.per_kg_charge
-                    + delivery_location_prices.base_charge
-                )
-            forbidden_deliveries = ForbiddenDelivery.objects.filter(
-                product=item.item.product
-            )
-            for forbidden in forbidden_deliveries:
-                if forbidden.district == drop_location.district:
-                    forbidden_products.append(item.item.product.product_name)
-        order.order_price += shipping_price
-        order.delivery_charge += shipping_price
-        if forbidden_products:
-            raise ValidationError(
-                f"Cannot deliver {', '.join(forbidden_products)} to {drop_location.district} district."
-            )
+        order.order_price += StandardShippingCharge.base_charge
+        order.delivery_charge = StandardShippingCharge.base_charge
+        
         order.drop_location = drop_location
         if "shipping" in validated_data and validated_data["shipping"]:
-            if validated_data["shipping"] == "Express":
-                # Check if the district matches
-                express_place = ExpressShippingPlace.objects.filter(
-                    district__iexact=drop_location.district
-                ).first()
-                if not express_place:
-                    raise ValidationError(
-                        "Cannot provide this service outside of Express Shipping districts!"
-                    )
-
-                # Check if the city matches
-                if not express_place.cities.filter(
-                    city__iexact=drop_location.city
-                ).exists():
-                    raise ValidationError(
-                        "Cannot provide this service to the specified place!"
-                    )
-
             shipping_type = ShippingType.objects.get(
                 shipping_type=validated_data["shipping"]
             )
             order.shipping = shipping_type
-            express_price = ExpressShippingCharge.objects.all().first()
-            order.order_price += express_price.charge
-            order.delivery_charge += express_price.charge
+            if shipping_type.shipping_type == "Express":
+                express_price = ExpressShippingCharge.objects.all().first()
+                order.order_price += express_price.charge
+                order.delivery_charge += express_price.charge
         order.save()
         return validated_data
 

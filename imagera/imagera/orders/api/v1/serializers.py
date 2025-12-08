@@ -291,8 +291,8 @@ class UpdateOrderSerializer(serializers.Serializer):
             order_status="Pending",
         ).first()
         drop_location = DropLocation.objects.get(id=validated_data["drop_location_id"])
-        order.order_price += StandardShippingCharge.base_charge
-        order.delivery_charge = StandardShippingCharge.base_charge
+        order.order_price += int(StandardShippingCharge.objects.first().base_charge)
+        order.delivery_charge = int(StandardShippingCharge.objects.first().base_charge)
         
         order.drop_location = drop_location
         if "shipping" in validated_data and validated_data["shipping"]:

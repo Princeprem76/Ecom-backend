@@ -4,6 +4,7 @@ from imagera.orders.models import (
     ShippingType,
     Orders,
     DropLocation,
+    Items,
     # StandardFreeDeliveryCities,
     # StandardFreeDeliveryPlace,
     StandardShippingCharge,
@@ -19,6 +20,7 @@ admin.site.register(
         ShippingType,
         Orders,
         DropLocation,
+        Items,
        
         StandardShippingCharge,
         ExpressShippingCharge,

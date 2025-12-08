@@ -1,7 +1,7 @@
 from typing import Any
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
-from config.settings.base import env
+from config.settings.base import GOOGLE_VERTEX_ENDPOINT_ID, GOOGLE_VERTEX_LOCATION, GOOGLE_VERTEX_PROJECT_ID
 from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
@@ -50,7 +50,7 @@ from django.db.models import Q
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 import json
 from django.core.cache import cache
-from core.bing_search_service import VertexProductRecognizer
+from core.bing_search_service import VertexImageProductFinder
 
 class ViewCategory(ListAPIView):
     permission_classes = []
@@ -214,6 +214,7 @@ class FindProducts(ListAPIView):
         queryset = Products.objects.all()
 
         all_product = self.request.query_params.get("products", None)
+        
         user = self.request.user if self.request.user.is_authenticated else None
         search_vector = (
             SearchVector("product_name", weight="A")
@@ -235,6 +236,7 @@ class FindProducts(ListAPIView):
             )
         # Filter by product name
         product_names = self.request.query_params.get("product_name", None)
+        print(product_names)
         if product_names:
             if user:
                 SearchedProduct.objects.get_or_create(
@@ -867,31 +869,27 @@ class ImageFindProducts(FindProducts):
     )
     def post(self, request, *args, **kwargs):
         image_file = request.FILES.get("image")
-        
-
+        print(image_file)
         if not image_file:
             return Response(
-                {"detail": "Provide Image to process this request!"},
+                {"detail": "Image file is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        recognizer = VertexProductRecognizer(
-            project_id=env.GOOGLE_VERTEX_PROJECT_ID,
-            location=env.GOOGLE_VERTEX_LOCATION,
-            endpoint_id=env.GOOGLE_VERTEX_ENDPOINT_ID,
+        finder = VertexImageProductFinder(
+            project=GOOGLE_VERTEX_PROJECT_ID,
+            endpoint_id=GOOGLE_VERTEX_ENDPOINT_ID,
+            location= "us-central1",
         )
 
-        product_name = recognizer.extract_product_name(
-            image_file=image_file,
-        )
-
+        product_name = finder.predict_product_name_from_file(image_file)
         if not product_name:
             return Response(
                 {"detail": "Could not infer a product name from this image."},
                 status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
-        # log search term like in your text search endpoint
+        # Save search term like your text search
         user = request.user if request.user and request.user.is_authenticated else None
         if user:
             SearchedProduct.objects.get_or_create(
@@ -899,9 +897,9 @@ class ImageFindProducts(FindProducts):
                 searched_term=product_name,
             )
 
-        # Inject product_name into GET params -> reuse FindProducts.get()
-        q = request._request.GET.copy()
-        q["product_name"] = product_name
+        # Inject product_name into query params so we can reuse FindProducts.get()
+        q = request._request.GET.copy() if hasattr(request._request, "GET") else QuerySet(mutable=True)
+        q["product"] = product_name
         request._request.GET = q
 
         return super().get(request, *args, **kwargs)

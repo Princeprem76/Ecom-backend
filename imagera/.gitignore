@@ -275,3 +275,4 @@ imagera/media/
 .env
 .envs/*
 !.envs/.local/
+service-key.json
